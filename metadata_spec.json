@@ -1,0 +1,12 @@
+{
+  "description": "<song title> by <artist>",
+  "image": "https://<link to song cover art image>",
+  "name": "<name of song>",
+  "animation_url": "https://<link to mp3 of song>",
+  "attributes": [
+    {
+      "trait_type": "Artist Name",
+      "value": "<artist name>"
+    }
+  ]
+}
