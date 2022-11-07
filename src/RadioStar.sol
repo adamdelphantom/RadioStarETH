@@ -7,10 +7,10 @@ contract RadioStar is ERC1155 {
     address public owner;
     uint256 public tokenId = 0;
 
-    mapping(uint256 => address) private tokensToArtist;
-    // TODO: mapping for tokenId to price for artist to be able to set price
+    mapping(uint256 => address) public tokensToArtist;
+    mapping(uint256 => uint256) private tokensToPrice;
 
-    event RadioStarCreated(address artistAccount, uint256 tokenId);
+    event RadioStarCreated(address artistAccount, uint256 tokenId, uint256 supply, uint256 priceInHundredthsOfEther);
     event RadioStarPurchased(address fanAccount, uint256 tokenId);
 
     constructor(string memory uri) ERC1155(uri) {
@@ -19,23 +19,22 @@ contract RadioStar is ERC1155 {
     }
 
     // Function for an artist to create a RadioStar Song NFT for purchase
-    function createRadioStar(uint256 supply) external {
-        // TODO: set price
-        _mint(owner, tokenId, supply, "");
-        tokensToArtist[tokenId] = msg.sender;
-        emit RadioStarCreated(msg.sender, tokenId);
-        // tokenId is incremented to be the tokenId for next RadioStar
+    function createRadioStar(uint256 supply, uint256 priceInHundredthsOfEther) external {
         tokenId++;
+        tokensToArtist[tokenId] = msg.sender;
+        tokensToPrice[tokenId] = priceInHundredthsOfEther;
+        _mint(owner, tokenId, supply, "");
+        emit RadioStarCreated(msg.sender, tokenId, supply, priceInHundredthsOfEther);
     }
 
     // Function for a fan to purchase a RadioStar Song NFT
-    function mintRadioStar(uint256 _tokenId) external {
-        // TODO: require payment
+    function mintRadioStar(uint256 _tokenId) external payable {
+        uint256 songPrice = tokensToPrice[_tokenId];
+        // TODO: require payment to >= songPrice
         address artistAccount = tokensToArtist[_tokenId];
-        // TODO: send percentage of funds to artistAccount
+        // TODO: send 2% of funds to owner
+        // TODO: send remainer of funds to artistAccount
         safeTransferFrom(owner, msg.sender, _tokenId, 1, "");
         emit RadioStarPurchased(msg.sender, _tokenId);
     }
-
-    // TODO: Function for RadioStar owner to withdraw funds
 }
