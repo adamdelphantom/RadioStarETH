@@ -42,7 +42,7 @@ contract RadioStarTest is Test {
         vm.stopPrank();
     }
 
-    function testMintRadioStar() public {
+    function xtestMintRadioStar() public {
         vm.startPrank(radioStarOwner);
         uint256 _supply = 100;
         uint256 _priceInGwei = 20000000;
