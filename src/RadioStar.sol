@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC1155/erc1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract RadioStar is ERC1155 {
     address private _owner;
@@ -10,6 +10,7 @@ contract RadioStar is ERC1155 {
 
     mapping(uint256 => address) public tokensToArtist;
     mapping(uint256 => uint256) public tokensToPrice;
+    mapping(address => uint256) public balances;
 
     event RadioStarCreated(
         address indexed artistAccount,
@@ -19,8 +20,7 @@ contract RadioStar is ERC1155 {
     );
     event RadioStarPurchased(address indexed fanAccount, uint256 indexed tokenId);
 
-    constructor(string memory uri) ERC1155(uri) {
-        _setURI(uri);
+    constructor() ERC1155("") {
         _owner = msg.sender;
     }
 
@@ -33,7 +33,6 @@ contract RadioStar is ERC1155 {
         tokenId++;
         tokensToArtist[tokenId] = msg.sender;
         tokensToPrice[tokenId] = priceInGwei;
-        _mint(_owner, tokenId, supply, "");
         emit RadioStarCreated(
             msg.sender,
             tokenId,
@@ -42,15 +41,17 @@ contract RadioStar is ERC1155 {
         );
     }
 
-    // // Function for a fan to purchase a RadioStar Song NFT
-    // function mintRadioStar(uint256 _tokenId) external payable {
-    //     require(
-    //         tokensToPrice[_tokenId] <= msg.value,
-    //         "the price should be greater or equal to the listing price"
-    //     );
-    //     safeTransferFrom(_owner, msg.sender, _tokenId, 1, "");
-    //     emit RadioStarPurchased(msg.sender, _tokenId);
-    // }
+    // Function for a fan to purchase a RadioStar Song NFT
+    function buyRadioStar(uint256 _tokenId) external payable {
+        require(
+            tokensToPrice[_tokenId] <= msg.value,
+            "the price should be greater or equal to the listing price"
+        );       
+        // Add supply check here
+        _mint(msg.sender, tokenId, 1, "");
+        balances[tokensToArtist[_tokenId]] += msg.value;
+        emit RadioStarPurchased(msg.sender, _tokenId);
+    }
 
     receive() external payable {}
 }
