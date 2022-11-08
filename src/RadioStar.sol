@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "openzeppelin-contracts/token/ERC1155/erc1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/erc1155.sol";
 
 contract RadioStar is ERC1155 {
     address private _owner;
