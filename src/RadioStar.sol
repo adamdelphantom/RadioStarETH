@@ -42,15 +42,15 @@ contract RadioStar is ERC1155 {
         );
     }
 
-    // Function for a fan to purchase a RadioStar Song NFT
-    function mintRadioStar(uint256 _tokenId) external payable {
-        require(
-            tokensToPrice[_tokenId] <= msg.value,
-            "the price should be greater or equal to the listing price"
-        );
-        safeTransferFrom(_owner, msg.sender, _tokenId, 1, "");
-        emit RadioStarPurchased(msg.sender, _tokenId);
-    }
+    // // Function for a fan to purchase a RadioStar Song NFT
+    // function mintRadioStar(uint256 _tokenId) external payable {
+    //     require(
+    //         tokensToPrice[_tokenId] <= msg.value,
+    //         "the price should be greater or equal to the listing price"
+    //     );
+    //     safeTransferFrom(_owner, msg.sender, _tokenId, 1, "");
+    //     emit RadioStarPurchased(msg.sender, _tokenId);
+    // }
 
     receive() external payable {}
 }

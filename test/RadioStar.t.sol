@@ -43,19 +43,13 @@ contract RadioStarTest is Test {
     }
 
     function testMintRadioStar() public {
-        vm.startPrank(radioStarArtist);
+        vm.startPrank(radioStarOwner);
         uint256 _supply = 100;
         uint256 _priceInGwei = 20000000;
-        radioStar.createRadioStar(_supply, _priceInGwei);
-        vm.stopPrank();
-
-        vm.deal(radioStarFan, 10000e18);
-        vm.startPrank(radioStarFan);
 
         vm.expectEmit(true, true, true, true); 
-        emit RadioStarPurchased(radioStarFan, 1);
+        radioStar.createRadioStar(_supply, _priceInGwei);
 
-        radioStar.mintRadioStar{value: _priceInGwei}(1);
         vm.stopPrank();
     }
 }
