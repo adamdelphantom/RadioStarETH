@@ -53,6 +53,7 @@ contract RadioStarTest is Test {
         uint256 fanBalanceBefore = radioStarFan.balance;
         uint256 artistBalanceBefore = radioStar.balances(radioStarArtist);
         vm.deal(radioStarFan, 2*TOKEN_PRICE);
+
         vm.startPrank(radioStarFan);
 
         vm.expectEmit(true, true, true, true);
@@ -65,4 +66,20 @@ contract RadioStarTest is Test {
  
         vm.stopPrank();
     }
+    
+    function testBuyRadioStar_value_too_low_fail() public {
+        uint256 TOKEN_PRICE = 20000000;
+        vm.startPrank(radioStarArtist);
+        uint256 _supply = 100;
+        uint256 _priceInGwei = TOKEN_PRICE;
+        radioStar.createRadioStar(_supply, _priceInGwei);
+        vm.stopPrank();
+
+        vm.deal(radioStarFan, 2*TOKEN_PRICE);
+        vm.startPrank(radioStarFan);
+
+        vm.expectRevert();
+        radioStar.buyRadioStar{value: TOKEN_PRICE-1}(1);
+    }
+
 }

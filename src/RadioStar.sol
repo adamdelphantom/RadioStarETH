@@ -47,7 +47,7 @@ contract RadioStar is ERC1155 {
             tokensToPrice[_tokenId] <= msg.value,
             "the price should be greater or equal to the listing price"
         );       
-        // Add supply check here
+        // TODO: Add supply check here
         _mint(msg.sender, tokenId, 1, "");
         balances[tokensToArtist[_tokenId]] += msg.value;
         emit RadioStarPurchased(msg.sender, _tokenId);
