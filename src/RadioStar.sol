@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 
-contract RadioStar is ERC1155 {
+contract RadioStar is ERC1155URIStorage{
     address private _owner;
     // TokenId 0 will not be associated with a token
     uint256 public tokenId = 0;
@@ -28,7 +28,7 @@ contract RadioStar is ERC1155 {
     }
 
     // Function for an artist to create a RadioStar Song NFT for purchase
-    function createRadioStar(uint256 supply, uint256 priceInGwei) external {
+    function createRadioStar(uint256 supply, uint256 priceInGwei, string memory _uri) external {
         require(
             priceInGwei >= 10000000,
             "listing price should be greater than 0.01 eth"
@@ -36,6 +36,7 @@ contract RadioStar is ERC1155 {
         tokenId++;
         tokensToArtist[tokenId] = msg.sender;
         tokensToPrice[tokenId] = priceInGwei;
+        ERC1155URIStorage._setURI(tokenId, _uri);
         emit RadioStarCreated(msg.sender, tokenId, supply, priceInGwei);
     }
 
