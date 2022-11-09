@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
-import "forge-std/console.sol";
+import "@forge-std/Test.sol";
+import "@forge-std/console.sol";
 import "../src/RadioStar.sol";
 
 contract RadioStarTest is Test {
@@ -34,7 +34,7 @@ contract RadioStarTest is Test {
         vm.expectEmit(true, true, true, true);
         emit RadioStarCreated(radioStarArtist, 1, _supply, _priceInGwei);
 
-        radioStar.createRadioStar(_supply, _priceInGwei);
+        radioStar.createRadioStar("artist1", "track1", _supply, _priceInGwei);
 
         assertEq(radioStar.tokensToArtist(1), radioStarArtist, "TokenId not mapped to Artist's Account");
         assertEq(radioStar.tokensToPrice(1), _priceInGwei, "tokenId not mapped to price");
@@ -47,7 +47,7 @@ contract RadioStarTest is Test {
         vm.startPrank(radioStarArtist);
         uint256 _supply = 100;
         uint256 _priceInGwei = TOKEN_PRICE;
-        radioStar.createRadioStar(_supply, _priceInGwei);
+        radioStar.createRadioStar("artist2", "track2", _supply, _priceInGwei);
         vm.stopPrank();
 
         vm.deal(radioStarFan, TOKEN_PRICE+1);
@@ -73,7 +73,7 @@ contract RadioStarTest is Test {
         vm.startPrank(radioStarArtist);
         uint256 _supply = 100;
         uint256 _priceInGwei = TOKEN_PRICE;
-        radioStar.createRadioStar(_supply, _priceInGwei);
+        radioStar.createRadioStar("artist3", "track3", _supply, _priceInGwei);
         vm.stopPrank();
 
         vm.deal(radioStarFan, 2*TOKEN_PRICE);
