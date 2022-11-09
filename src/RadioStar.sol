@@ -18,7 +18,10 @@ contract RadioStar is ERC1155 {
         uint256 supply,
         uint256 priceInGwei
     );
-    event RadioStarPurchased(address indexed fanAccount, uint256 indexed tokenId);
+    event RadioStarPurchased(
+        address indexed fanAccount,
+        uint256 indexed tokenId
+    );
 
     constructor() ERC1155("") {
         _owner = msg.sender;
@@ -33,24 +36,34 @@ contract RadioStar is ERC1155 {
         tokenId++;
         tokensToArtist[tokenId] = msg.sender;
         tokensToPrice[tokenId] = priceInGwei;
-        emit RadioStarCreated(
-            msg.sender,
-            tokenId,
-            supply,
-            priceInGwei
-        );
+        emit RadioStarCreated(msg.sender, tokenId, supply, priceInGwei);
     }
 
     // Function for a fan to purchase a RadioStar Song NFT
     function buyRadioStar(uint256 _tokenId) external payable {
         require(
+            tokensToArtist[_tokenId] != address(0),
+            "the song doesnt exists"
+        );
+        require(
             tokensToPrice[_tokenId] <= msg.value,
             "the price should be greater or equal to the listing price"
-        );       
+        );
         // TODO: Add supply check here
         _mint(msg.sender, tokenId, 1, "");
         balances[tokensToArtist[_tokenId]] += msg.value;
         emit RadioStarPurchased(msg.sender, _tokenId);
+    }
+
+    function withdraw() external {
+        require(
+            balances[msg.sender] >= 10000000,
+            "you don't have much balance, sell more songs!"
+        );
+        uint256 balance = balances[msg.sender];
+        balances[msg.sender] = 0;
+        (bool sent, ) = payable(msg.sender).call{value: balance}("");
+        require(sent, "Failed to transfer the balance");
     }
 
     receive() external payable {}
