@@ -50,9 +50,10 @@ contract RadioStarTest is Test {
         radioStar.createRadioStar(_supply, _priceInGwei);
         vm.stopPrank();
 
+        vm.deal(radioStarFan, TOKEN_PRICE+1);
         uint256 fanBalanceBefore = radioStarFan.balance;
+                console.log("Fan balance before ", radioStarFan.balance)  ;  
         uint256 artistBalanceBefore = radioStar.balances(radioStarArtist);
-        vm.deal(radioStarFan, 2*TOKEN_PRICE);
 
         vm.startPrank(radioStarFan);
 
@@ -61,10 +62,10 @@ contract RadioStarTest is Test {
 
         radioStar.buyRadioStar{value: TOKEN_PRICE}(1);
 
-        assertEq(radioStar.balances(radioStarArtist)-artistBalanceBefore, TOKEN_PRICE);     
-        assertEq(radioStarFan.balance-fanBalanceBefore, TOKEN_PRICE);
- 
-        vm.stopPrank();
+        assertEq(radioStar.balances(radioStarArtist)-artistBalanceBefore, TOKEN_PRICE); 
+        console.log("Fan balance after ", radioStarFan.balance)  ;  
+        assertEq(fanBalanceBefore-radioStarFan.balance, TOKEN_PRICE);   
+        vm.stopPrank();  
     }
     
     function testBuyRadioStar_value_too_low_fail() public {
