@@ -54,10 +54,15 @@ contract RadioStarTest is Test {
         uint256 artistBalanceBefore = radioStar.balances(radioStarArtist);
         vm.deal(radioStarFan, 2*TOKEN_PRICE);
         vm.startPrank(radioStarFan);
+
+        vm.expectEmit(true, true, true, true);
+        emit RadioStarPurchased(radioStarFan, 1);
+
         radioStar.buyRadioStar{value: TOKEN_PRICE}(1);
-        vm.stopPrank();
 
         assertEq(radioStar.balances(radioStarArtist)-artistBalanceBefore, TOKEN_PRICE);     
-        assertEq(radioStarFan.balance-fanBalanceBefore, TOKEN_PRICE);     
+        assertEq(radioStarFan.balance-fanBalanceBefore, TOKEN_PRICE);
+ 
+        vm.stopPrank();
     }
 }
