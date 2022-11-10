@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 
 contract RadioStar is ERC1155URIStorage{
 
-    uint256 public PLATFORM_ROYALTY_PERCENT = 2;
+    uint256 public constant PLATFORM_ROYALTY_PERCENT = 2;
 
     address private _owner;
     // TokenId 0 will not be associated with a token
@@ -58,7 +58,7 @@ contract RadioStar is ERC1155URIStorage{
         _mint(msg.sender, tokenId, 1, "");
 
         uint256 amountPaid = msg.value;
-        uint256 platformRoyalty = amountPaid/100 * PLATFORM_ROYALTY_PERCENT;
+        uint256 platformRoyalty = amountPaid * PLATFORM_ROYALTY_PERCENT / 100;
         uint256 artistAmoundRemaining = amountPaid - platformRoyalty;
         balances[tokensToArtist[_tokenId]] += artistAmoundRemaining;
         royaltyCollected += platformRoyalty;
