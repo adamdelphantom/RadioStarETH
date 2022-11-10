@@ -14,7 +14,8 @@ contract RadioStar is ERC1155URIStorage{
     mapping(uint256 => address) public tokensToArtist;
     mapping(uint256 => uint256) public tokensToPrice;
     mapping(address => uint256) public balances;
-    uint256 public royaltyCollected = 0;
+    mapping(address => uint256[]) public purchasedSongs; 
+     uint256 public royaltyCollected = 0;
 
     event RadioStarCreated(
         address indexed artistAccount,
@@ -56,7 +57,7 @@ contract RadioStar is ERC1155URIStorage{
         );
         // TODO: Add supply check here
         _mint(msg.sender, tokenId, 1, "");
-
+        purchasedSongs[msg.sender].push(_tokenId);
         uint256 amountPaid = msg.value;
         uint256 platformRoyalty = amountPaid * PLATFORM_ROYALTY_PERCENT / 100;
         uint256 artistAmoundRemaining = amountPaid - platformRoyalty;
@@ -64,6 +65,10 @@ contract RadioStar is ERC1155URIStorage{
         royaltyCollected += platformRoyalty;
 
         emit RadioStarPurchased(msg.sender, _tokenId);
+    }
+
+    function getPurchasedSongs(address purchaser) public view returns (uint256[] memory) {
+        return purchasedSongs[purchaser];
     }
 
     function withdraw() external {
