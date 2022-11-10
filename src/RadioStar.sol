@@ -67,15 +67,23 @@ contract RadioStar is ERC1155URIStorage{
     }
 
     function withdraw() external {
-        // TODO: owner should be able to withdraw uncollected royalty
+
+        uint256 withdrawAmount;
+        if (msg.sender == _owner) {
+            withdrawAmount = royaltyCollected;
+            royaltyCollected = 0;
+        } else {
+           
+            withdrawAmount = balances[msg.sender];
+            balances[msg.sender] = 0;
+        }
         require(
-            balances[msg.sender] >= 10000000,
-            "you don't have much balance, sell more songs!"
-        );
-        uint256 balance = balances[msg.sender];
-        balances[msg.sender] = 0;
-        (bool sent, ) = payable(msg.sender).call{value: balance}("");
+                withdrawAmount >= 10000000,
+                "Insufficient fund to withdraw."
+            );
+        (bool sent, ) = payable(msg.sender).call{value: withdrawAmount}("");
         require(sent, "Failed to transfer the balance");
+
     }
 
     receive() external payable {}
