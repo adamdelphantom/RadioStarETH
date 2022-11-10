@@ -33,7 +33,8 @@ contract RadioStar is ERC1155URIStorage{
     }
 
     // Function for an artist to create a RadioStar Song NFT for purchase
-    function createRadioStar(uint256 supply, uint256 priceInGwei, string memory _uri) external {
+    // TODO: make this external when createRadioStar is removed
+    function createSong(uint256 supply, uint256 priceInGwei, string memory _uri) public {
         require(
             priceInGwei >= 10000000,
             "listing price should be greater than 0.01 eth"
@@ -45,8 +46,14 @@ contract RadioStar is ERC1155URIStorage{
         emit RadioStarCreated(msg.sender, tokenId, supply, priceInGwei);
     }
 
+    // Deprecated: use createSong
+    function createRadioStar(uint256 supply, uint256 priceInGwei, string memory _uri) external {
+        createSong(supply, priceInGwei, _uri);
+    }
+
     // Function for a fan to purchase a RadioStar Song NFT
-    function buyRadioStar(uint256 _tokenId) external payable {
+    // TODO: make external when buyRadioStar is removed
+    function buySong(uint256 _tokenId) public payable {
         require(
             tokensToArtist[_tokenId] != address(0),
             "the song doesnt exists"
@@ -65,6 +72,11 @@ contract RadioStar is ERC1155URIStorage{
         royaltyCollected += platformRoyalty;
 
         emit RadioStarPurchased(msg.sender, _tokenId);
+    }
+
+      // Deprecated: use buySong
+    function buyRadioStar(uint256 _tokenId) external payable {
+        buySong(_tokenId);
     }
 
     function getPurchasedSongs(address purchaser) public view returns (uint256[] memory) {
