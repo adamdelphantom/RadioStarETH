@@ -60,11 +60,20 @@ contract RadioStarTest is Test {
         vm.expectEmit(true, true, true, true);
         emit RadioStarPurchased(radioStarFan, 1);
 
-        radioStar.buyRadioStar{value: TOKEN_PRICE}(1);
+        uint256 royaltyBeforePurchase = radioStar.royaltyCollected();
 
-        assertEq(radioStar.balances(radioStarArtist)-artistBalanceBefore, TOKEN_PRICE); 
+        radioStar.buyRadioStar{value: TOKEN_PRICE}(1);
+        uint256 expectedRoyalty = TOKEN_PRICE * radioStar.PLATFORM_ROYALTY_PERCENT() / 100;
+        uint256 amountAfterRoyalty = TOKEN_PRICE - expectedRoyalty;
+
+        assertEq(radioStar.balances(radioStarArtist)-artistBalanceBefore, amountAfterRoyalty); 
+
         console.log("Fan balance after ", radioStarFan.balance)  ;  
+
         assertEq(fanBalanceBefore-radioStarFan.balance, TOKEN_PRICE);   
+
+        assertEq(radioStar.royaltyCollected(), royaltyBeforePurchase+expectedRoyalty);
+        
         vm.stopPrank();  
     }
     
