@@ -35,7 +35,7 @@ contract RadioStarTest is Test {
         vm.expectEmit(true, true, true, true);
         emit RadioStarCreated(radioStarArtist, 1, _supply, _fanPriceInGwei);
 
-        radioStar.createSong(_supply, _fanPriceInGwei, _superfanPriceInGwei, "");
+        radioStar.createSong(_fanPriceInGwei, "", _supply, _superfanPriceInGwei, "");
 
         assertEq(radioStar.tokensToArtist(1), radioStarArtist, "TokenId not mapped to Artist's Account");
         assertEq(radioStar.tokensToFanPrice(1), _fanPriceInGwei, "tokenId not mapped to price");
@@ -45,7 +45,7 @@ contract RadioStarTest is Test {
 
     function setupPurchase(uint256 _supply, uint256 _fanPriceInGwei, uint256 _superfanPriceInGwei) internal {
         vm.startPrank(radioStarArtist);
-        radioStar.createSong(_supply, _fanPriceInGwei, _superfanPriceInGwei, "");
+        radioStar.createSong(_fanPriceInGwei, "", _supply, _superfanPriceInGwei, "");
         vm.stopPrank();
 
         vm.deal(radioStarFan, _fanPriceInGwei+1);
@@ -57,7 +57,7 @@ contract RadioStarTest is Test {
 
         uint256 royaltyBeforePurchase = radioStar.platformRoyaltyCollected();
         uint256 fanBalanceBefore = radioStarFan.balance;
-        uint256 artistBalanceBefore = radioStar.balances(radioStarArtist);
+        uint256 artistBalanceBefore = radioStar.ethBalances(radioStarArtist);
 
         vm.expectEmit(true, true, true, true);
         emit RadioStarPurchased(radioStarFan, 1);
@@ -67,7 +67,7 @@ contract RadioStarTest is Test {
         radioStar.buySong{value: TOKEN_PRICE}(1);
 
         uint256 priceMinusRoyalty = TOKEN_PRICE - platformRoyaltyAmount(TOKEN_PRICE);
-        assertEq(radioStar.balances(radioStarArtist), artistBalanceBefore+priceMinusRoyalty, "artistBalance"); 
+        assertEq(radioStar.ethBalances(radioStarArtist), artistBalanceBefore+priceMinusRoyalty, "artistBalance"); 
 
         console.log("Fan balance after ", radioStarFan.balance)  ;  
 

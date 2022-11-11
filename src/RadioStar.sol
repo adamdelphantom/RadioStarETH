@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 
 contract RadioStar is ERC1155URIStorage {
     uint256 public constant PLATFORM_ROYALTY_PERCENT = 2;
-    uint256 public constant SUPERFAN_ROYALITY_PERCENT = 3;
+    uint256 public constant SUPERFAN_ROYALTY_PERCENT = 3;
     address private _owner;
     // TokenId 0 will not be associated with a token
     uint256 public tokenId = 0;
@@ -16,6 +16,7 @@ contract RadioStar is ERC1155URIStorage {
     mapping(uint256 => uint256) public tokensToFanPrice;
     mapping(uint256 => uint256) public tokensToSuperfanPrice; // for superfans
     mapping(uint256 => uint256) public tokensToSuperfanSupply; // only applicable for limited edition NFTs
+    mapping(uint256 => uint256) public fanTokensToSuperFanTokens;
     
     mapping(address => uint256) public ethBalances;
     mapping(address => uint256[]) public purchasedSongs;
@@ -24,7 +25,7 @@ contract RadioStar is ERC1155URIStorage {
     mapping(address => mapping(uint256 => bool)) public hasMinted;
 
     uint256 public platformRoyaltyCollected = 0;
-    mapping(uint256 => uint256) superfanRoyaltyCollected; // tokenId to royality
+    mapping(uint256 => uint256) superfanRoyaltyCollected; // tokenId to royalty
     address[] private superFans;
 
     event songCreated(
@@ -44,11 +45,12 @@ contract RadioStar is ERC1155URIStorage {
     }
 
     // Function for an artist to create a RadioStar Song NFT for purchase
-    // TODO: make this external when createRadioStar is removed
     function createSong(
-        uint256 superFanSupply,
         uint256 fanPrice,
-        uint256 superFanPrice
+        string memory fanTokenUri,
+        uint256 superFanSupply,
+        uint256 superFanPrice,
+        string memory superFanTokenUri
     ) external {
         require(
             fanPrice >= 10**6, // in gwei
@@ -64,6 +66,7 @@ contract RadioStar is ERC1155URIStorage {
         tokensToArtist[fanTokenId] = msg.sender;
         tokensToFanPrice[fanTokenId] = fanPrice;
         fanTokenIds.push(fanTokenId);
+        ERC1155URIStorage._setURI(fanTokenId, fanTokenUri);
         
         tokenId += 1;
         
@@ -71,7 +74,10 @@ contract RadioStar is ERC1155URIStorage {
         tokensToSuperfanPrice[superFanTokenId] = superFanPrice;
         tokensToSuperfanSupply[superFanTokenId] = superFanSupply; //only applicable for limited NFTs (superfans)
         superFanTokenIds.push(superFanTokenId);
+        ERC1155URIStorage._setURI(superFanTokenId, superFanTokenUri); 
        
+        fanTokensToSuperFanTokens[fanTokenId] = superFanTokenId;
+
         tokenId += 1;
 
         emit songCreated(
@@ -84,13 +90,7 @@ contract RadioStar is ERC1155URIStorage {
         );
     }
 
-    // Deprecated: use createSong
-    // function createRadioStar(uint256 supply, uint256 priceInGwei, string memory _uri) external {
-    //     createSong(supply, priceInGwei, _uri);
-    // }
-
     // Function for a fan to purchase a RadioStar Song NFT
-    // TODO: make external when buyRadioStar is removed
     function buySong(uint256 _tokenId) external payable {
         require(
             tokensToArtist[_tokenId] != address(0),
@@ -104,27 +104,20 @@ contract RadioStar is ERC1155URIStorage {
         _mint(msg.sender, tokenId, 1, "");
         purchasedSongs[msg.sender].push(_tokenId);
 
-        if (hasPurchased[msg.sender][_tokenId] == false) {
-            hasPurchased[msg.sender][_tokenId] = true;
-        }
-
         uint256 amountPaid = msg.value;
         uint256 platformRoyalty = (amountPaid * PLATFORM_ROYALTY_PERCENT) / 100;
-        uint256 superfanRoyalty = (amountPaid * SUPERFAN_ROYALITY_PERCENT) /
+        uint256 superfanRoyalty = (amountPaid * SUPERFAN_ROYALTY_PERCENT) /
             100;
 
-        uint256 artistAmoundRemaining = amountPaid -
+        uint256 artistAmountRemaining = amountPaid -
             (platformRoyalty + superfanRoyalty);
 
-        ethBalances[tokensToArtist[_tokenId]] += artistAmoundRemaining;
+        ethBalances[tokensToArtist[_tokenId]] += artistAmountRemaining;
         platformRoyaltyCollected += platformRoyalty;
+        superfanRoyaltyCollected[fanTokensToSuperFanTokens[_tokenId]] += superfanRoyalty;
+
         emit songPurchased(msg.sender, _tokenId);
     }
-
-    // Deprecated: use buySong
-    // function buyRadioStar(uint256 _tokenId) external payable {
-    //     buySong(_tokenId);
-    // }
 
     //function to mint limited edition nfts for superfans
     function mintSuperfanNFT(uint256 _songTokenId) external payable {
@@ -180,12 +173,12 @@ contract RadioStar is ERC1155URIStorage {
 
     // need to check if caller is a superfan
     function withdrawSuperfan() external {
-        uint256 royality = 0;
+        uint256 royalty = 0;
         for (uint256 i = 0; i < mintedSongs[msg.sender].length; i++) {
             uint256 songid = mintedSongs[msg.sender][i];
-            royality += superfanRoyaltyCollected[songid];
+            royalty += superfanRoyaltyCollected[songid];
         }
-        (bool sent, ) = payable(msg.sender).call{value: royality}("");
+        (bool sent, ) = payable(msg.sender).call{value: royalty}("");
         require(sent, "Failed to transfer the royalities");
     }
 
