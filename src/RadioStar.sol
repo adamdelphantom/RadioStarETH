@@ -114,8 +114,10 @@ contract RadioStar is ERC1155URIStorage {
 
         ethBalances[tokensToArtist[_tokenId]] += artistAmountRemaining;
         platformRoyaltyCollected += platformRoyalty;
-        //TODO: need to check superroyalitycollected tokenid
-        superfanRoyaltyCollected[_tokenId] += superfanRoyalty;
+
+        // TODO: change this to update balances of all superfan holders with royalties
+        // instead of a lump sum
+        superfanRoyaltyCollected[fanTokensToSuperFanTokens[_tokenId]] += superfanRoyalty;
 
         emit songPurchased(msg.sender, _tokenId);
     }
@@ -140,10 +142,8 @@ contract RadioStar is ERC1155URIStorage {
             "the price should be greater or equal to the listing price"
         );
 
-        //TODO: tokenId for Fan NFTs and Superfan NFTs are different. figire out how to associiate odd tokenids for fans and even tokenids for superfans
         _mint(msg.sender, tokenId, 1, "");
         tokensToSuperfanSupply[fanTokensToSuperFanTokens[_tokenId]] -= 1;
-        //TODO:check if this is the right approach
         ethBalances[tokensToArtist[fanTokensToSuperFanTokens[_tokenId]]] += msg
             .value;
         hasMinted[msg.sender][fanTokensToSuperFanTokens[_tokenId]] = true;
@@ -178,11 +178,8 @@ contract RadioStar is ERC1155URIStorage {
     // need to check if caller is a superfan
     function withdrawSuperfan() external {
         require(mintedSongs[msg.sender].length != 0, "you are not a superfan");
-        uint256 royalty = 0;
-        for (uint256 i = 0; i < mintedSongs[msg.sender].length; i++) {
-            uint256 songid = mintedSongs[msg.sender][i];
-            royalty += superfanRoyaltyCollected[songid];
-        }
+
+        // send allocation to superfan holder
         (bool sent, ) = payable(msg.sender).call{value: royalty}("");
         require(sent, "Failed to transfer the royalities");
     }
