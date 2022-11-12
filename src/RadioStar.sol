@@ -25,7 +25,10 @@ contract RadioStar is ERC1155URIStorage {
     mapping(address => mapping(uint256 => bool)) public hasMinted;
 
     uint256 public platformRoyaltyCollected = 0;
-    mapping(uint256 => uint256) superfanRoyaltyCollected; // tokenId to royalty
+    //mapping(uint256 => uint256) superfanRoyaltyCollected; // tokenId to royalty
+    mapping(address => uint256) superfanToRoyality;
+    mapping(uint256 => address[]) tokensToSuperfans;
+
     address[] private superFans;
 
     event songCreated(
@@ -117,8 +120,26 @@ contract RadioStar is ERC1155URIStorage {
 
         // TODO: change this to update balances of all superfan holders with royalties
         // instead of a lump sum
-        superfanRoyaltyCollected[fanTokensToSuperFanTokens[_tokenId]] += superfanRoyalty;
 
+        // superfanRoyaltyCollected[
+        //     fanTokensToSuperFanTokens[_tokenId]
+        // ] += superfanRoyalty;
+        uint256 royalityPerfan = superfanRoyalty /
+            tokensToSuperfans[fanTokensToSuperFanTokens[_tokenId]].length;
+        for (
+            uint256 i = 0;
+            i < tokensToSuperfans[fanTokensToSuperFanTokens[_tokenId]].length;
+            i++
+        ) {
+            superfanToRoyality[
+                tokensToSuperfans[fanTokensToSuperFanTokens[_tokenId]][i]
+            ] += royalityPerfan;
+            // address payable sf = payable(
+            //     tokensToSuperfans[fanTokensToSuperFanTokens[_tokenId]][i]
+            // );
+            // (bool sent, ) = payable(msg.sender).call{value: royalityPerfan}("");
+            // require(sent, "Failed to transfer the royalities");
+        }
         emit songPurchased(msg.sender, _tokenId);
     }
 
@@ -147,7 +168,8 @@ contract RadioStar is ERC1155URIStorage {
         ethBalances[tokensToArtist[fanTokensToSuperFanTokens[_tokenId]]] += msg
             .value;
         hasMinted[msg.sender][fanTokensToSuperFanTokens[_tokenId]] = true;
-        superFans.push(msg.sender);
+        tokensToSuperfans[fanTokensToSuperFanTokens[_tokenId]].push(msg.sender);
+        //superFans.push(msg.sender);
         mintedSongs[msg.sender].push(fanTokensToSuperFanTokens[_tokenId]);
         emit songMinted(msg.sender, fanTokensToSuperFanTokens[_tokenId]);
     }
