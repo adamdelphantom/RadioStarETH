@@ -17,7 +17,9 @@ contract RadioStarTest is Test {
         uint256 supply,
         uint256 priceInGwei
     );
-    event RadioStarPurchased(address indexed fanAccount, uint256 indexed tokenId);
+    event RadioStarPurchased(address indexed fanAccount, 
+        uint256 indexed amountPaid, 
+        uint256 indexed tokenId);
     
     function setUp() public {
         vm.prank(radioStarOwner);
@@ -79,7 +81,7 @@ contract RadioStarTest is Test {
         uint256 artistBalanceBefore = radioStar.balances(radioStarArtist);
 
         vm.expectEmit(true, true, true, true);
-        emit RadioStarPurchased(radioStarFan, 1);
+        emit RadioStarPurchased(radioStarFan, TOKEN_PRICE, 1);
 
         vm.startPrank(radioStarFan);
    
@@ -106,7 +108,7 @@ contract RadioStarTest is Test {
         uint256 artistBalanceBefore = radioStar.balances(radioStarArtist);
 
         vm.expectEmit(true, true, true, true);
-        emit RadioStarPurchased(radioStarFan, 1);
+        emit RadioStarPurchased(radioStarFan, TOKEN_PRICE, 1);
 
         vm.startPrank(radioStarFan);
    

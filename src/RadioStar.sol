@@ -25,6 +25,7 @@ contract RadioStar is ERC1155URIStorage{
     );
     event RadioStarPurchased(
         address indexed fanAccount,
+        uint256 indexed amountPaid,
         uint256 indexed tokenId
     );
 
@@ -71,7 +72,7 @@ contract RadioStar is ERC1155URIStorage{
         balances[tokensToArtist[_tokenId]] += artistAmoundRemaining;
         royaltyCollected += platformRoyalty;
 
-        emit RadioStarPurchased(msg.sender, _tokenId);
+        emit RadioStarPurchased(msg.sender, amountPaid, _tokenId);
     }
 
       // Deprecated: use buySong
