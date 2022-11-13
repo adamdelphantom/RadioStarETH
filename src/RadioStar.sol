@@ -27,9 +27,7 @@ contract RadioStar is ERC1155URIStorage {
     uint256 public platformRoyaltyCollected = 0;
     //mapping(uint256 => uint256) superfanRoyaltyCollected; // tokenId to royalty
     mapping(address => uint256) superfanToRoyality;
-    mapping(uint256 => address[]) tokensToSuperfans;
-
-    address[] private superFans;
+    mapping(uint256 => address[]) tokenToSuperfans;
 
     event songCreated(
         address indexed artistAccount,
@@ -169,7 +167,6 @@ contract RadioStar is ERC1155URIStorage {
             .value;
         hasMinted[msg.sender][fanTokensToSuperFanTokens[_tokenId]] = true;
         tokensToSuperfans[fanTokensToSuperFanTokens[_tokenId]].push(msg.sender);
-        //superFans.push(msg.sender);
         mintedSongs[msg.sender].push(fanTokensToSuperFanTokens[_tokenId]);
         emit songMinted(msg.sender, fanTokensToSuperFanTokens[_tokenId]);
     }
@@ -200,9 +197,13 @@ contract RadioStar is ERC1155URIStorage {
     // need to check if caller is a superfan
     function withdrawSuperfan() external {
         require(mintedSongs[msg.sender].length != 0, "you are not a superfan");
-
-        // send allocation to superfan holder
-        (bool sent, ) = payable(msg.sender).call{value: royalty}("");
+        require(
+            superfanToRoyality[msg.sender] != 0,
+            "you have withdrawn all your royalities"
+        );
+        uint256 amountToBePaid = superfanToRoyality[msg.sender];
+        superfanToRoyality[msg.sender] = 0;
+        (bool sent, ) = payable(msg.sender).call{value: amountToBePaid}("");
         require(sent, "Failed to transfer the royalities");
     }
 
