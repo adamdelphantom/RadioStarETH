@@ -27,7 +27,7 @@ contract RadioStar is ERC1155URIStorage {
     uint256 public platformRoyaltyCollected = 0;
     //mapping(uint256 => uint256) superfanRoyaltyCollected; // tokenId to royalty
     mapping(address => uint256) superfanToRoyality;
-    mapping(uint256 => address[]) tokenToSuperfans;
+    mapping(uint256 => address[]) tokensToSuperfans;
 
     event songCreated(
         address indexed artistAccount,
